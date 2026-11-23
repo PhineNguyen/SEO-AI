@@ -1,0 +1,88 @@
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing, typing & linting caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+
+# =============================================================================
+# Environment & Secrets (NEVER commit real secrets)
+# =============================================================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+client_secret*.json
+service_account*.json
+
+# =============================================================================
+# Frontend (Node / Vite / TypeScript)
+# =============================================================================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+*.tsbuildinfo
+
+# =============================================================================
+# Local Runtime Outputs, Exports, Uploads & ML Caches
+# =============================================================================
+exports/
+uploads/
+logs/
+*.log
+*.xlsx
+*.csv
+!backend/tests/fixtures/**
+.cache/
+huggingface_cache/
+
+# =============================================================================
+# IDE & OS Artifacts
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini

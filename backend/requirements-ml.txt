@@ -1,0 +1,5 @@
+# Optional local embedding dependencies.
+# Install only when EMBEDDING_PROVIDER=sentence_transformers is enabled.
+# V1 default uses OpenAI text-embedding-3-small (included in requirements.txt)
+# to keep the Docker image lightweight.
+sentence-transformers>=3.1.0,<4.0.0
