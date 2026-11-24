@@ -1,38 +1,38 @@
 # AI Keyword Research & Content Planning Agent
 
-Hệ thống **AI Agent chuyên biệt cho SEO Keyword Research & Content Planning** theo hướng **Data-driven**, **Evidence-based** và **Human-in-the-loop**.
+A specialized **AI Agent for SEO Keyword Research & Content Planning**, built around **Data-driven**, **Evidence-based**, and **Human-in-the-loop** principles.
 
-> Dự án tập trung sâu vào chất lượng nghiên cứu từ khóa, phân tích SERP, phân loại Search Intent có bằng chứng, Keyword Clustering đa tín hiệu và Content Brief chuẩn SEO Content — không mở rộng sang Technical SEO Audit, Backlink Analysis hay Rank Tracking trong V1.
-
----
-
-## 5 Nguyên tắc cốt lõi
-
-1. **Data-driven**: Mọi số liệu SEO đến từ nguồn dữ liệu thực tế có provenance rõ ràng; phân biệt `NULL` (`NOT_AVAILABLE` / `NOT_COLLECTED` / `SOURCE_ERROR`) với giá trị `0`.
-2. **Evidence-based**: AI không được hallucinate metrics hay URL; mọi phân loại Intent, Cluster và Content Brief phải trích dẫn SERP evidence từ DB.
-3. **Human-in-the-loop**: 3 điểm kiểm duyệt bắt buộc (Keyword List, Keyword Clusters, Content Brief), lưu vết thay đổi và không ghi đè mất baseline của AI.
-4. **Modular Architecture**: Modular Monolith tách rõ tầng, dễ bảo trì, kiểm thử và thay thế nhà cung cấp dữ liệu.
-5. **Accuracy over Features**: Đánh giá Intent và Clustering định lượng trên Golden Dataset được SEO Specialist duyệt thủ công.
+> This project focuses deeply on keyword research accuracy, SERP analysis, evidence-backed Search Intent classification, multi-signal Keyword Clustering, and SEO Content Brief generation — intentionally excluding Technical SEO Audits, Backlink Analysis, and Rank Tracking in V1.
 
 ---
 
-## Quyết định kiến trúc đã thống nhất cho V1
+## Core Principles
 
-| Hạng mục | Lựa chọn đã chốt |
+1. **Data-driven**: Every SEO metric comes from real data sources with full provenance; missing values (`NULL` with `NOT_AVAILABLE` / `NOT_COLLECTED` / `SOURCE_ERROR`) are strictly separated from `0`.
+2. **Evidence-based**: AI never hallucinates metrics or URLs; every Search Intent classification, cluster, and Content Brief must reference real SERP evidence persisted in the database.
+3. **Human-in-the-loop**: Three mandatory review checkpoints (Keyword List, Keyword Clusters, Content Brief) with full audit trails that preserve the original AI baseline.
+4. **Modular Architecture**: A clean Modular Monolith with clear layer boundaries, easy to test, maintain, and swap data providers.
+5. **Accuracy over Features**: Intent classification and clustering quality are evaluated quantitatively against a manually curated Golden Dataset.
+
+---
+
+## Confirmed V1 Architecture Decisions
+
+| Area | Selected Approach |
 | :--- | :--- |
-| **Kiến trúc tổng thể** | Modular Monolith (FastAPI + Celery + LangGraph + PostgreSQL + Redis) |
-| **SERP Provider chính** | **DataForSEO** (kèm tùy chọn DataForSEO Keywords Data API) |
-| **Nguồn Keyword Metrics giai đoạn đầu** | **Semrush** (CSV/Excel Import + `SemrushConnector` API v4 sẵn sàng kèm Mock) + **Spineditor** (CSV/Excel Import) + **Google Search Console** (OAuth 2.0 cho property sở hữu) + DataForSEO Keyword API (tùy chọn) |
+| **Overall Architecture** | Modular Monolith (FastAPI + Celery + LangGraph + PostgreSQL + Redis) |
+| **Primary SERP Provider** | **DataForSEO** (with optional DataForSEO Keywords Data API) |
+| **Initial Keyword Metrics Sources** | **Semrush** (CSV/Excel Import + ready-to-use `SemrushConnector` API v4 with Mock) + **Spineditor** (CSV/Excel Import) + **Google Search Console** (OAuth 2.0 for verified properties) + optional DataForSEO Keyword API |
 | **Frontend UI** | **React + TypeScript + Vite + Material UI (MUI)** (`@mui/x-data-grid`) |
-| **Embedding cho Clustering** | `BaseEmbeddingProvider`: mặc định V1 dùng **OpenAI `text-embedding-3-small`**, chuyển đổi sang **Sentence Transformers local** qua biến môi trường `EMBEDDING_PROVIDER` |
-| **Authentication & Security** | **JWT Auth (email/password)** từ Sprint 1 + mã hóa đối xứng **Fernet** cho Google OAuth tokens |
+| **Clustering Embeddings** | `BaseEmbeddingProvider`: V1 defaults to **OpenAI `text-embedding-3-small`**, switchable to local **Sentence Transformers** via `EMBEDDING_PROVIDER` |
+| **Authentication & Security** | **JWT Auth (email/password)** from Sprint 1 + symmetric **Fernet** encryption for stored Google OAuth tokens |
 
 ---
 
-## Cấu trúc thư mục dự án
+## Repository Structure
 
 ```text
-d:\SEO-AI\
+SEO-AI/
 ├── backend/
 │   ├── alembic/versions/        # Database migrations (Sprint 1+)
 │   ├── app/
@@ -45,7 +45,7 @@ d:\SEO-AI\
 │   │   ├── repositories/        # Data access layer
 │   │   ├── database/            # PostgreSQL engine, session, base
 │   │   ├── workers/             # Celery app & async workflow tasks
-│   │   └── utils/               # Security (JWT, Fernet, SSRF guard), normalization
+│   │   └── utils/               # Security (JWT, Fernet, SSRF guard), normalization, logging
 │   ├── tests/                   # Unit, integration, API, security & Golden Dataset tests
 │   ├── pyproject.toml
 │   ├── requirements.txt
@@ -60,10 +60,12 @@ d:\SEO-AI\
 │   └── package.json
 ├── docs/
 │   ├── ARCHITECTURE.md
-│   └── DATABASE.md
+│   ├── DATABASE.md
+│   └── API_SPEC.md
 ├── .env.example
 ├── .editorconfig
 ├── .gitignore
+├── docker-compose.yml
 ├── PROJECT_STATUS.md
 ├── TASKS.md
 ├── CHANGELOG.md
@@ -72,66 +74,66 @@ d:\SEO-AI\
 
 ---
 
-## Yêu cầu môi trường & Chuẩn bị
+## Prerequisites
 
-- **Python**: `3.12` (Docker runtime cố định Python 3.12 để đảm bảo tương thích thư viện ML/NLP).
-- **Node.js**: `20+` (hiện có `v24.20.0`).
-- **Docker & Docker Compose**: Dùng để chạy PostgreSQL 16, Redis 7, Backend và Celery Worker.
-- **Cấu hình biến môi trường**: Sao chép `.env.example` thành `.env` khi cần tùy chỉnh biến môi trường (tuyệt đối không commit `.env`).
+- **Python**: `3.12` (Docker runtime pins Python 3.12 for optimal ML/NLP wheel compatibility).
+- **Node.js**: `20+`.
+- **Docker & Docker Compose**: Runs PostgreSQL 16, Redis 7, Alembic `migrate`, FastAPI Backend, and Celery Worker.
+- **Environment Variables**: Copy `.env.example` to `.env` for local overrides (never commit `.env`).
 
 ---
 
-## Chạy local
+## Running Locally
 
-### 1. Chạy toàn bộ stack bằng Docker Compose (Khuyến nghị)
+### 1. Run the full stack with Docker Compose (Recommended)
 ```powershell
-# (Tùy chọn) Sao chép file env mẫu
+# (Optional) Copy environment template
 Copy-Item .env.example .env
 
-# Build và khởi động PostgreSQL, Redis, FastAPI Backend và Celery Worker
+# Build and start PostgreSQL, Redis, Alembic migrate, FastAPI Backend, and Celery Worker
 docker compose up -d --build
 
-# Kiểm tra trạng thái container
-docker compose ps
+# Check container health
+docker compose ps -a
 ```
 
-Các endpoint đang hoạt động khi stack chạy:
+Active endpoints once running:
 - **Liveness**: `http://localhost:8000/health`
 - **Readiness (Postgres + Redis)**: `http://localhost:8000/ready`
-- **Swagger UI (chế độ dev)**: `http://localhost:8000/docs`
+- **Swagger UI (dev mode)**: `http://localhost:8000/docs`
 
-Để dừng cụm container:
+Stop the stack:
 ```powershell
 docker compose down
 ```
 
-### 2. Quản lý Database Migrations (Alembic)
-Service `migrate` trong `docker-compose.yml` tự động chạy `alembic upgrade head` mỗi khi khởi động stack. Khi cần thao tác thủ công:
+### 2. Database Migrations (Alembic)
+The `migrate` service in `docker-compose.yml` automatically runs `alembic upgrade head` on startup. For manual operations:
 ```powershell
-# Kiểm tra revision hiện tại và đối chiếu drift giữa ORM models với migration
+# Check current revision and verify zero drift between ORM models and migrations
 docker compose run --rm migrate alembic current
 docker compose run --rm migrate alembic check
 
-# Hoặc chạy trực tiếp trên máy cục bộ (khi Postgres đang mở cổng 5432)
+# Or run locally against Postgres on localhost:5432
 Set-Location backend
 .\.venv\Scripts\python.exe -m alembic upgrade head
 ```
 
-### 3. Chạy kiểm thử backend trên máy cục bộ (Virtualenv)
+### 3. Run Backend Tests Locally (Virtualenv)
 ```powershell
 python -m venv backend/.venv
 backend\.venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
 Set-Location backend
 .\.venv\Scripts\python.exe -m pytest -v
-.\.venv\Scripts\python.exe -m ruff check app tests
+.\.venv\Scripts\python.exe -m ruff check app tests alembic
 ```
 
 ---
 
-## Lộ trình phát triển (8 Sprints)
+## Development Roadmap (8 Sprints)
 
-- **Sprint 1**: Foundation, Database, JWT Auth & Project Management (`TASK-001` – `TASK-005`)
-- **Sprint 2**: Data Connectors & File Import (`TASK-006` – `TASK-010`)
+- **Sprint 1**: Foundation, Database, JWT Auth & Project Management (`TASK-001` – `TASK-005`) — **Completed**
+- **Sprint 2**: Data Connectors & File Import (`TASK-006` – `TASK-010`) — **In Progress**
 - **Sprint 3**: Keyword Research & Cleaning Engine (`TASK-011` – `TASK-014`)
 - **Sprint 4**: SERP Analysis, Competitor Headings & Search Intent (`TASK-015` – `TASK-018`)
 - **Sprint 5**: Hybrid Keyword Clustering & Prioritization (`TASK-019` – `TASK-021`)
@@ -141,10 +143,11 @@ Set-Location backend
 
 ---
 
-## Tài liệu dự án
+## Documentation
 
-- [PROJECT_STATUS.md](./PROJECT_STATUS.md) – Trạng thái Sprint, tiến độ task và ma trận tích hợp
-- [TASKS.md](./TASKS.md) – Backlog chi tiết 8 Sprints / 32 Tasks
-- [CHANGELOG.md](./CHANGELOG.md) – Lịch sử thay đổi dự án
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) – Kiến trúc Modular Monolith & thiết kế bảo mật/AI
-- [docs/DATABASE.md](./docs/DATABASE.md) – ERD, đặc tả bảng PostgreSQL và kế hoạch Alembic migrations
+- [PROJECT_STATUS.md](./PROJECT_STATUS.md) – Sprint status, task progress, and integration readiness matrix
+- [TASKS.md](./TASKS.md) – Full 8-Sprint / 32-Task development backlog
+- [CHANGELOG.md](./CHANGELOG.md) – Project changelog
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) – Modular Monolith architecture, AI orchestration, and security controls
+- [docs/DATABASE.md](./docs/DATABASE.md) – ERD, PostgreSQL table specifications, and Alembic migration plan
+- [docs/API_SPEC.md](./docs/API_SPEC.md) – REST API specification for Ops, Auth, and Project Management endpoints
