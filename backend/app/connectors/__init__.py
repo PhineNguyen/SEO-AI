@@ -11,7 +11,17 @@ from app.connectors.exceptions import (
     ConnectorTimeoutError,
     ConnectorUpstreamError,
 )
+from app.connectors.gkp import GoogleKeywordPlannerImporter
+from app.connectors.gsc import GSC_READONLY_SCOPE, GoogleOAuthManager, GscConnector
 from app.connectors.http_client import QuotaTracker, RateLimiter, ResilientHttpClient, RetryConfig
+from app.connectors.semrush import (
+    FileImportReport,
+    MockSemrushProvider,
+    SemrushApiConnector,
+    SemrushFileImporter,
+)
+from app.connectors.serp import DataForSeoConnector, MockDataForSeoProvider
+from app.connectors.spineditor import SpineditorFileImporter
 
 __all__ = [
     "BaseDataProvider",
@@ -23,8 +33,19 @@ __all__ = [
     "ConnectorRateLimitError",
     "ConnectorTimeoutError",
     "ConnectorUpstreamError",
+    "DataForSeoConnector",
+    "FileImportReport",
+    "GSC_READONLY_SCOPE",
+    "GoogleKeywordPlannerImporter",
+    "GoogleOAuthManager",
+    "GscConnector",
+    "MockDataForSeoProvider",
+    "MockSemrushProvider",
     "QuotaTracker",
     "RateLimiter",
     "ResilientHttpClient",
     "RetryConfig",
+    "SemrushApiConnector",
+    "SemrushFileImporter",
+    "SpineditorFileImporter",
 ]

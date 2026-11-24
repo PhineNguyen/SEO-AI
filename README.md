@@ -133,13 +133,13 @@ Set-Location backend
 ## Development Roadmap (8 Sprints)
 
 - **Sprint 1**: Foundation, Database, JWT Auth & Project Management (`TASK-001` – `TASK-005`) — **Completed**
-- **Sprint 2**: Data Connectors & File Import (`TASK-006` – `TASK-010`) — **In Progress**
-- **Sprint 3**: Keyword Research & Cleaning Engine (`TASK-011` – `TASK-014`)
-- **Sprint 4**: SERP Analysis, Competitor Headings & Search Intent (`TASK-015` – `TASK-018`)
-- **Sprint 5**: Hybrid Keyword Clustering & Prioritization (`TASK-019` – `TASK-021`)
-- **Sprint 6**: LangGraph AI Agent & Human-in-the-Loop Orchestration (`TASK-022` – `TASK-024`)
-- **Sprint 7**: Content Brief Generation & Review (`TASK-025` – `TASK-027`)
-- **Sprint 8**: Export (Excel / Google Sheets), React Dashboard, E2E & Deployment (`TASK-028` – `TASK-032`)
+- **Sprint 2**: Data Connectors & File Import (`TASK-006` – `TASK-010`) — **Completed**
+- **Sprint 3**: Keyword Research & Cleaning Engine (`TASK-011` – `TASK-014`) — **Completed**
+- **Sprint 4**: SERP Analysis, Competitor Headings & Search Intent (`TASK-015` – `TASK-018`) — **Completed**
+- **Sprint 5**: Hybrid Keyword Clustering & Prioritization (`TASK-019` – `TASK-021`) — **Completed**
+- **Sprint 6**: LangGraph AI Agent & Human-in-the-Loop Orchestration (`TASK-022` – `TASK-024`) — **Completed**
+- **Sprint 7**: Content Brief Generation & Review (`TASK-025` – `TASK-027`) — **Completed**
+- **Sprint 8**: Export (Excel / Google Sheets), React Dashboard, E2E & Deployment (`TASK-028` – `TASK-032`) — **Completed**
 
 ---
 

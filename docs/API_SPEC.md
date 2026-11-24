@@ -77,3 +77,19 @@ All endpoints below require `Authorization: Bearer <token>` and enforce owner-sc
 | `POST` | `/api/v1/projects/{project_id}/competitors` | Add competitor (normalizes `domain`) | `201`, `401`, `404`, `409`, `422` |
 | `PATCH` | `/api/v1/projects/{project_id}/competitors/{competitor_id}` | Update competitor details | `200`, `401`, `404`, `409`, `422` |
 | `DELETE` | `/api/v1/projects/{project_id}/competitors/{competitor_id}` | Remove a competitor from the project | `204`, `401`, `404` |
+
+---
+
+## 5. Keyword Research, File Imports & Review 1 (`/api/v1/research-runs`, `/api/v1/keywords`)
+
+| Method | Path | Description | Status Codes |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/projects/{project_id}/research-runs` | Create a Research Run snapshotting project settings and saving seed keywords | `201`, `401`, `404`, `422` |
+| `GET` | `/api/v1/projects/{project_id}/research-runs` | List historical Research Runs for a project | `200`, `401`, `404` |
+| `GET` | `/api/v1/research-runs/{run_id}` | Get Research Run details, seed keywords, and cleaning status counts | `200`, `401`, `404` |
+| `POST` | `/api/v1/research-runs/{run_id}/imports` | Upload CSV/XLSX file (`multipart/form-data`: `source_code=gkp_csv\|spineditor_import\|semrush_csv`, `file`) | `201`, `401`, `404`, `413`, `422` |
+| `POST` | `/api/v1/research-runs/{run_id}/clean` | Execute non-destructive keyword cleaning & deduplication | `200`, `401`, `404` |
+| `GET` | `/api/v1/research-runs/{run_id}/keywords` | List keywords with latest aggregated metrics (`?cleaning_status=&review_status=&search=&limit=50&offset=0`) | `200`, `401`, `404` |
+| `POST` | `/api/v1/research-runs/{run_id}/keywords` | Manually add an approved active keyword | `201`, `401`, `404`, `409`, `422` |
+| `PATCH` | `/api/v1/keywords/{keyword_id}` | Review 1: Approve, reject, edit text, or mark irrelevant (preserves `original_keyword`) | `200`, `401`, `404`, `409`, `422` |
+| `POST` | `/api/v1/research-runs/{run_id}/keywords/bulk-review` | Review 1: Bulk update `review_status` / `cleaning_status` | `200`, `401`, `404`, `422` |

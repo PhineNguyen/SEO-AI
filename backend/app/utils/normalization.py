@@ -2,7 +2,10 @@
 
 import ipaddress
 import re
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+
+TRACKING_QUERY_PREFIXES = ("utm_",)
+TRACKING_QUERY_KEYS = {"fbclid", "gclid", "msclkid", "ref", "mc_cid", "mc_eid"}
 
 DOMAIN_REGEX = re.compile(
     r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$"
@@ -96,3 +99,33 @@ def normalize_language_code(raw: str) -> str:
     if not LANGUAGE_CODE_REGEX.match(normalized):
         raise ValueError("target_language must match BCP-47 format (e.g. vi, en, en-US)")
     return normalized
+
+
+def normalize_serp_url(raw_url: str) -> str:
+    """Normalize a SERP URL for accurate cross-keyword SERP Overlap matching.
+
+    Lowercases scheme and host, strips leading www., drops fragments and common
+    tracking query parameters (utm_*, fbclid, gclid), and trims trailing slashes.
+    """
+    parsed = urlparse(raw_url.strip())
+    scheme = (parsed.scheme or "https").lower()
+    hostname = (parsed.hostname or "").rstrip(".").lower()
+    if hostname.startswith("www.") and "." in hostname[4:]:
+        hostname = hostname[4:]
+
+    netloc = f"{hostname}:{parsed.port}" if parsed.port and parsed.port not in (80, 443) else hostname
+    path = parsed.path or ""
+    if path.endswith("/") and len(path) > 1:
+        path = path.rstrip("/")
+    elif path == "/":
+        path = ""
+
+    filtered_params = [
+        (k, v)
+        for k, v in parse_qsl(parsed.query, keep_blank_values=False)
+        if k.lower() not in TRACKING_QUERY_KEYS
+        and not any(k.lower().startswith(p) for p in TRACKING_QUERY_PREFIXES)
+    ]
+    filtered_params.sort()
+    query = urlencode(filtered_params)
+    return urlunparse((scheme, netloc, path, "", query, ""))

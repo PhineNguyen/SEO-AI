@@ -78,8 +78,12 @@ def test_database_url() -> Iterator[str]:
 @pytest.fixture(scope="session")
 def migrated_engine(test_database_url: str) -> Iterator[Engine]:
     """Run Alembic migrations to head and yield an engine bound to the test DB."""
+    from app.agents.checkpointer import open_postgres_checkpointer
+
     cfg = make_alembic_config(test_database_url)
     command.upgrade(cfg, "head")
+    with open_postgres_checkpointer(test_database_url, run_setup=True):
+        pass
     engine = create_engine(test_database_url, pool_pre_ping=True)
     try:
         yield engine
@@ -99,3 +103,22 @@ def db_session(migrated_engine: Engine) -> Iterator[Session]:
         session.close()
         transaction.rollback()
         connection.close()
+
+
+@pytest.fixture
+def api_client(db_session: Session) -> Iterator[object]:
+    """Provide a FastAPI TestClient wired to the isolated PostgreSQL db_session."""
+    from app.config import get_settings
+    from app.database.session import get_db
+    from app.main import create_app
+    from fastapi.testclient import TestClient
+
+    app = create_app(get_settings())
+
+    def _override_get_db() -> Iterator[Session]:
+        yield db_session
+
+    app.dependency_overrides[get_db] = _override_get_db
+    with TestClient(app) as client:
+        yield client
+    app.dependency_overrides.clear()

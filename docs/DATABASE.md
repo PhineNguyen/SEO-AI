@@ -125,7 +125,7 @@ erDiagram
 
 ---
 
-## 5. Migration 001 Implementation Status (`TASK-003`)
+## 5. Applied Migrations Status (`0001` – `0006`)
 
 ### Technical Decisions
 - **Synchronous SQLAlchemy 2.x + `psycopg3`**: Aligns cleanly with Celery workers, `langgraph-checkpoint-postgres`, and FastAPI `def` endpoints running in threadpool.
@@ -136,11 +136,13 @@ erDiagram
   - `websites.project_id`, `project_settings.project_id`, `competitors.project_id` → `CASCADE`
   - `projects.owner_id` → `RESTRICT` (prevents accidental deletion of users who own research projects).
 
-### Implemented Constraints & Seed Data (`0001_init_core`)
-- Extension: `pg_trgm`.
-- Check constraints: `ck_users_role_allowed`, `ck_data_sources_source_type_allowed`, `ck_oauth_credentials_provider_allowed`, `ck_projects_target_country_iso2`, `ck_projects_target_language_bcp47`, `ck_projects_status_allowed`, `ck_project_settings_default_device_allowed`.
-- Partial unique index: `uq_websites_one_primary_per_project` on `websites(project_id) WHERE is_primary`.
-- Seeded `data_sources`: `dataforseo_serp`, `dataforseo_kw`, `semrush_api`, `semrush_csv`, `gsc_api`, `spineditor_import`, `manual`.
+### Applied Revisions (All 6 Migrations Verified with Zero Drift)
+- **`0001_init_core` (`TASK-003`)**: Installs `pg_trgm`, creates 7 core tables (`users`, `oauth_credentials`, `projects`, `websites`, `project_settings`, `competitors`, `data_sources`), partial unique index `uq_websites_one_primary_per_project`, and seeds 7 default `data_sources`.
+- **`0002_keyword_research` (`TASK-011`)**: Creates 7 keyword research tables (`research_runs`, `seed_keywords`, `source_imports`, `keywords`, `keyword_sources`, `keyword_metrics`, `keyword_tags`), GIN trigram index on `keywords.normalized_keyword`, partial unique active keyword index, DB-level `data_status` vs `numeric_value` check constraint, and seeds `gkp_csv`.
+- **`0003_serp_and_intent` (`TASK-015`)**: Creates 5 SERP & intent tables (`competitor_pages`, `competitor_headings`, `serp_snapshots`, `serp_results`, `keyword_intents`), normalized URL indexes for SERP overlap, and partial unique index ensuring a single current intent (`is_current = true`) per keyword.
+- **`0004_clustering_and_reviews` (`TASK-019`)**: Creates 3 clustering tables (`keyword_clusters`, `cluster_keywords`, `cluster_reviews`) with Review 2 audit trails.
+- **`0005_workflow_and_hitl` (`TASK-022`)**: Creates 3 orchestration tables (`workflow_executions`, `workflow_checkpoints`, `review_decisions`) alongside internal `langgraph-checkpoint-postgres` tables.
+- **`0006_content_briefs_and_exports` (`TASK-025`)**: Creates 6 brief & export tables (`content_briefs`, `brief_keywords`, `brief_sections`, `brief_faqs`, `brief_reviews`, `export_jobs`) with partial unique index enforcing one current brief per cluster.
 
 ### Common Alembic Commands
 ```powershell
