@@ -15,6 +15,17 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401 && localStorage.getItem('seo_ai_token')) {
+      localStorage.removeItem('seo_ai_token');
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface Project {
   id: string;
   name: string;
@@ -113,7 +124,7 @@ export const authApi = {
 };
 
 export const projectsApi = {
-  list: () => apiClient.get<Project[]>('/projects'),
+  list: () => apiClient.get<{ items: Project[]; total: number }>('/projects'),
   create: (payload: {
     name: string;
     niche: string;
@@ -140,6 +151,33 @@ export const researchApi = {
     });
   },
   cleanKeywords: (runId: string) => apiClient.post(`/research-runs/${runId}/clean`),
+  clearKeywords: (runId: string) =>
+    apiClient.delete<{ deleted_keywords: number }>(`/research-runs/${runId}/keywords`),
+  discoverGoogleSuggest: (runId: string, seed_keyword: string, max_keywords = 40) =>
+    apiClient.post<{
+      seed_keyword: string;
+      discovered_count: number;
+      inserted_count: number;
+      keywords: string[];
+    }>(`/research-runs/${runId}/discover-suggest`, {
+      seed_keyword,
+      expand_modifiers: true,
+      max_keywords,
+    }),
+  runAllPipeline: (runId: string, seed_keyword?: string, max_keywords = 40) =>
+    apiClient.post<{
+      discovered_count: number;
+      inserted_count: number;
+      active_keywords: number;
+      intents_classified: number;
+      clusters_created: number;
+      prioritized_keywords: number;
+      briefs_generated: number;
+    }>(`/research-runs/${runId}/run-all`, {
+      seed_keyword: seed_keyword?.trim() || null,
+      expand_modifiers: true,
+      max_keywords,
+    }),
   listKeywords: (runId: string) =>
     apiClient.get<{ items: KeywordItem[]; total: number }>(`/research-runs/${runId}/keywords`),
   addKeyword: (runId: string, keyword: string) =>

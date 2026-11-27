@@ -32,6 +32,8 @@ export const ResearchWorkspacePage: React.FC = () => {
   const [briefs, setBriefs] = useState<ContentBrief[]>([]);
   const [workflow, setWorkflow] = useState<WorkflowExecution | null>(null);
   const [newKeyword, setNewKeyword] = useState('');
+  const [seedInput, setSeedInput] = useState('');
+  const [busy, setBusy] = useState(false);
   const [sourceCode, setSourceCode] = useState('gkp_csv');
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
@@ -87,7 +89,7 @@ export const ResearchWorkspacePage: React.FC = () => {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 200,
+      width: 220,
       renderCell: (params) => (
         <Stack direction="row" spacing={1} alignItems="center" height="100%">
           <Button
@@ -169,6 +171,66 @@ export const ResearchWorkspacePage: React.FC = () => {
         </Alert>
       )}
 
+      <Card variant="outlined" sx={{ mb: 2, bgcolor: '#f0f6fc', borderColor: '#1f4e78' }}>
+        <CardContent sx={{ py: 2, '&:last-child': { pb: 2 } }}>
+          <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+            Quick Auto-Research (Free Google Suggest + 1-Click Pipeline)
+          </Typography>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} alignItems="stretch">
+            <TextField
+              size="small"
+              sx={{ flex: 1, minWidth: 260 }}
+              label="Seed Keyword (e.g. phan mem crm, thiet ke noi that)"
+              value={seedInput}
+              onChange={(e) => setSeedInput(e.target.value)}
+              disabled={busy}
+            />
+            <Button
+              variant="outlined"
+              disabled={busy || !seedInput.trim()}
+              sx={{ whiteSpace: 'nowrap', flexShrink: 0, px: 2.5 }}
+              onClick={async () => {
+                if (!runId || !seedInput.trim()) return;
+                setBusy(true);
+                try {
+                  const res = await researchApi.discoverGoogleSuggest(runId, seedInput.trim());
+                  setStatusMsg(
+                    `Google Suggest: discovered ${res.data.discovered_count} suggestions, added ${res.data.inserted_count} new keywords.`
+                  );
+                  await refreshAll();
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              Pull Google Suggest (Free)
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              disabled={busy}
+              sx={{ whiteSpace: 'nowrap', flexShrink: 0, px: 2.5 }}
+              onClick={async () => {
+                if (!runId) return;
+                setBusy(true);
+                try {
+                  const res = await researchApi.runAllPipeline(runId, seedInput);
+                  setStatusMsg(
+                    `1-Click Pipeline Done: +${res.data.inserted_count} keywords -> ${res.data.active_keywords} active -> ${res.data.clusters_created} clusters -> ${res.data.briefs_generated} Content Briefs ready!`
+                  );
+                  await refreshAll();
+                  if (res.data.briefs_generated > 0) setTab(2);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              {busy ? 'Running Pipeline...' : '1-Click Run All'}
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
+
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
         <Tab label={`Review 1: Keywords (${keywords.length})`} />
         <Tab label={`Review 2: Clusters (${clusters.length})`} />
@@ -233,6 +295,31 @@ export const ResearchWorkspacePage: React.FC = () => {
               }}
             >
               Score Priority
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              disabled={busy || keywords.length === 0}
+              onClick={async () => {
+                if (!runId) return;
+                if (
+                  !window.confirm(
+                    'Clear all keywords, clusters, and content briefs in this Research Run?'
+                  )
+                ) {
+                  return;
+                }
+                setBusy(true);
+                try {
+                  const res = await researchApi.clearKeywords(runId);
+                  setStatusMsg(`Cleared ${res.data.deleted_keywords} keywords from this run.`);
+                  await refreshAll();
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              Clear All
             </Button>
           </Stack>
 

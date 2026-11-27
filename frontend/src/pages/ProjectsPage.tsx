@@ -33,11 +33,12 @@ export const ProjectsPage: React.FC = () => {
   const loadProjects = async () => {
     try {
       const resp = await projectsApi.list();
-      setProjects(resp.data);
+      const projectList = Array.isArray(resp.data) ? resp.data : resp.data.items ?? [];
+      setProjects(projectList);
       const map: Record<string, ResearchRun[]> = {};
-      for (const p of resp.data) {
+      for (const p of projectList) {
         const r = await researchApi.listRuns(p.id);
-        map[p.id] = r.data;
+        map[p.id] = Array.isArray(r.data) ? r.data : [];
       }
       setRunsByProject(map);
     } catch {
